@@ -7,7 +7,7 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=1 \
     go build -v \
     -o /bin/container_state_exporter
 
-WORKDIR  /bin/container_state_exporter
+WORKDIR  /bin
 
 CMD ["./container_state_exporter"]
 
