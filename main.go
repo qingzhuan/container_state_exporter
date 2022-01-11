@@ -47,6 +47,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			info.Image,
 			info.Status,
 			info.State,
+			GetContainerVersion(info.Image),
 		)
 	}
 }
@@ -57,7 +58,7 @@ func NewExporter() *Exporter {
 		queryDockerStatus: prometheus.NewDesc(
 			"container_run_state",                                //指标名称
 			"query container status ",                              // 指标help信息
-			[]string{"name", "id", "image", "status", "state"}, 		// 指标的label名称
+			[]string{"name", "id", "image", "status", "state","version"}, 		// 指标的label名称
 			nil),
 	}
 }
@@ -74,6 +75,14 @@ func GetContainerList() (containerList []types.Container) {
 	if err != nil {
 		log.Printf("connect docker server err, %#v", err)
 		return
+	}
+	return
+}
+
+func GetContainerVersion(image string) (version string) {
+	split := strings.Split(image, ":")
+	if len(split) > 1 && strings.Count(image, "aiforward") > 1 {
+		version = split[1]
 	}
 	return
 }
