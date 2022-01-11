@@ -64,8 +64,8 @@ func NewExporter() *Exporter {
 }
 
 func GetContainerList() (containerList []types.Container) {
-	//client, err := client.NewClientWithOpts(client.WithVersion("1.38"), client.WithHost("tcp://10.100.3.206:2375"))
-	client, err := client.NewClientWithOpts(client.WithVersion("1.38"))
+	client, err := client.NewClientWithOpts(client.WithVersion("1.38"), client.WithHost("tcp://10.100.3.206:2375"))
+	//client, err := client.NewClientWithOpts(client.WithVersion("1.38"))
 
 	if err != nil {
 		log.Printf("connect docker server err, %#v", err)
@@ -81,7 +81,7 @@ func GetContainerList() (containerList []types.Container) {
 
 func GetContainerVersion(image string) (version string) {
 	split := strings.Split(image, ":")
-	if len(split) > 1 && strings.Count(image, "aiforward") > 1 {
+	if len(split) > 1 && strings.Contains(image, "aiforward") {
 		version = split[1]
 	}
 	return
