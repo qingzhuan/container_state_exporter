@@ -37,7 +37,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	for _, info := range GetContainerList() {
-		log.Println(info)
+		//log.Println(info)
 		ch <- prometheus.MustNewConstMetric(
 			e.queryDockerStatus,
 			prometheus.GaugeValue,
@@ -92,7 +92,7 @@ var (
 )
 
 func main() {
-	GetContainerList()
+	//GetContainerList()
 	// 6. 实例化并注册数据采集器exporter
 	workerA := NewExporter()
 	reg := prometheus.NewPedanticRegistry()
