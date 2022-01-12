@@ -18,6 +18,30 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// 定义容器运行状态，方便grafana展示时，不同的值展示不同的颜色
+const (
+
+	CREATED = "created"
+	RESTARTING = "restarting"
+	EXITED = "exited"
+	RUNNING = "running"
+	UNKNOW = "noknow"
+
+	UNKNOWStateValue = 0.1
+	CreatedStateValue = 0.2
+	RestartingStateValue = 0.4
+	ExitedStateValue = 0.6
+	RunningStateValue = 1
+)
+
+var ContainerStatusMap = map[string]float64{
+	CREATED: CreatedStateValue,
+	RESTARTING: RestartingStateValue,
+	EXITED: ExitedStateValue,
+	RUNNING: RunningStateValue,
+	UNKNOW: UNKNOWStateValue,
+}
+
 // 1. 定义一个结构体，用于存放描述信息
 type Exporter struct {
 	queryDockerStatus *prometheus.Desc
@@ -41,7 +65,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(
 			e.queryDockerStatus,
 			prometheus.GaugeValue,
-			0,
+			GetContainerStateValue(info.State),
 			strings.TrimPrefix(info.Names[0], "/"), // 指标的标签值与NewDesc中的第三个参数一样对应
 			info.ID,
 			info.Image,
@@ -64,8 +88,8 @@ func NewExporter() *Exporter {
 }
 
 func GetContainerList() (containerList []types.Container) {
-	//client, err := client.NewClientWithOpts(client.WithVersion("1.38"), client.WithHost("tcp://10.100.3.206:2375"))
-	client, err := client.NewClientWithOpts(client.WithVersion("1.38"))
+	client, err := client.NewClientWithOpts(client.WithVersion("1.38"), client.WithHost("tcp://10.100.3.206:2375"))
+	//client, err := client.NewClientWithOpts(client.WithVersion("1.38"))
 
 	if err != nil {
 		log.Printf("connect docker server err, %#v", err)
@@ -84,6 +108,15 @@ func GetContainerVersion(image string) (version string) {
 	if len(split) > 1 && strings.Contains(image, "aiforward") {
 		version = split[1]
 	}
+	return
+}
+
+func GetContainerStateValue(state string) (value float64) {
+	if v,ok := ContainerStatusMap[state]; ok {
+		value = v
+		return
+	}
+	value = ContainerStatusMap[UNKNOW]
 	return
 }
 
@@ -110,7 +143,7 @@ func main() {
 			ErrorHandling: promhttp.ContinueOnError,
 		})
 	http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("start...")
+		log.Println("start http metrics...")
 		h.ServeHTTP(w, r)
 	})
 
