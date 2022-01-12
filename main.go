@@ -88,8 +88,8 @@ func NewExporter() *Exporter {
 }
 
 func GetContainerList() (containerList []types.Container) {
-	client, err := client.NewClientWithOpts(client.WithVersion("1.38"), client.WithHost("tcp://10.100.3.206:2375"))
-	//client, err := client.NewClientWithOpts(client.WithVersion("1.38"))
+	//client, err := client.NewClientWithOpts(client.WithVersion("1.38"), client.WithHost("tcp://10.100.3.206:2375"))
+	client, err := client.NewClientWithOpts(client.WithVersion("1.38"))
 
 	if err != nil {
 		log.Printf("connect docker server err, %#v", err)
