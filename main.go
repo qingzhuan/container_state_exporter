@@ -18,6 +18,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// 定义常量
+var (
+	DockerClient *client.Client
+)
+
 // 定义容器运行状态，方便grafana展示时，不同的值展示不同的颜色
 const (
 
@@ -88,14 +93,8 @@ func NewExporter() *Exporter {
 }
 
 func GetContainerList() (containerList []types.Container) {
-	//client, err := client.NewClientWithOpts(client.WithVersion("1.38"), client.WithHost("tcp://10.100.3.206:2375"))
-	client, err := client.NewClientWithOpts(client.WithVersion("1.38"))
 
-	if err != nil {
-		log.Printf("connect docker server err, %#v", err)
-		return
-	}
-	containerList, err = client.ContainerList(context.Background(), types.ContainerListOptions{All: true})
+	containerList, err := DockerClient.ContainerList(context.Background(), types.ContainerListOptions{All: true})
 	if err != nil {
 		log.Printf("connect docker server err, %#v", err)
 		return
@@ -123,6 +122,27 @@ func GetContainerStateValue(state string) (value float64) {
 var (
 	address = flag.String("listen-address", ":9417", "The address to listen on for HTTP requests.")
 )
+
+func InitDockerConnect() {
+	//c, err := client.NewClientWithOpts(client.WithVersion("1.38"), client.WithHost("tcp://10.100.3.206:2375"))
+	c, err := client.NewClientWithOpts(client.WithVersion("1.38"))
+	log.Println("init docker server connect")
+	defer func() {
+		if err := c.Close();err != nil {
+			log.Printf("client close err:%v\n", err)
+		}
+	}()
+	if err != nil {
+		log.Printf("connect docker server err, %#v\n", err)
+		return
+	}
+
+	DockerClient = c
+}
+
+func init() {
+	InitDockerConnect()
+}
 
 func main() {
 	//GetContainerList()
