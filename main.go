@@ -127,11 +127,11 @@ func InitDockerConnect() {
 	//c, err := client.NewClientWithOpts(client.WithVersion("1.38"), client.WithHost("tcp://10.100.3.206:2375"))
 	c, err := client.NewClientWithOpts(client.WithVersion("1.38"))
 	log.Println("init docker server connect")
-	defer func() {
-		if err := c.Close();err != nil {
-			log.Printf("client close err:%v\n", err)
-		}
-	}()
+	//defer func() {
+	//	if err := c.Close();err != nil {
+	//		log.Printf("client close err:%v\n", err)
+	//	}
+	//}()
 	if err != nil {
 		log.Printf("connect docker server err, %#v\n", err)
 		return
